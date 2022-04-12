@@ -1,10 +1,8 @@
 package at.petrak.hexcasting.client
 
-import at.petrak.hexcasting.HexConfig
-import at.petrak.hexcasting.HexUtils
-import at.petrak.hexcasting.client.gui.SQRT_3
-import at.petrak.hexcasting.hexmath.HexCoord
-import at.petrak.hexcasting.hexmath.HexPattern
+import at.petrak.hexcasting.api.mod.HexConfig
+import at.petrak.hexcasting.api.utils.HexUtils
+import at.petrak.hexcasting.api.spell.math.HexPattern
 import com.mojang.blaze3d.systems.RenderSystem
 import com.mojang.blaze3d.vertex.DefaultVertexFormat
 import com.mojang.blaze3d.vertex.PoseStack
@@ -19,10 +17,8 @@ import net.minecraft.world.item.ItemStack
 import net.minecraft.world.level.levelgen.XoroshiroRandomSource
 import net.minecraft.world.level.levelgen.synth.PerlinNoise
 import net.minecraft.world.phys.Vec2
-import kotlin.math.absoluteValue
 import kotlin.math.floor
 import kotlin.math.min
-import kotlin.math.roundToInt
 import net.minecraft.util.FastColor.ARGB32 as FC
 
 /**
@@ -75,7 +71,6 @@ object RenderLib {
 
         val n = points.size
         for ((i, pair) in points.zipWithNext().withIndex()) {
-            val i = i.toFloat()
             val (p1, p2) = pair
             // https://github.com/not-fl3/macroquad/blob/master/src/shapes.rs#L163
             // GuiComponent::innerFill line 52
@@ -93,8 +88,8 @@ object RenderLib {
             fun color(time: Float): BlockPos =
                 BlockPos(Mth.lerp(time, r1, r2).toInt(), Mth.lerp(time, g1, g2).toInt(), Mth.lerp(time, b1, b2).toInt())
 
-            val color1 = color(i / n)
-            val color2 = color((i + 1) / n)
+            val color1 = color(i.toFloat() / n)
+            val color2 = color((i + 1f) / n)
             buf.vertex(mat, p1.x + tx, p1.y + ty, z).color(color1.x, color1.y, color1.z, a).endVertex()
             buf.vertex(mat, p1.x - tx, p1.y - ty, z).color(color1.x, color1.y, color1.z, a).endVertex()
             buf.vertex(mat, p2.x + tx, p2.y + ty, z).color(color2.x, color2.y, color2.z, a).endVertex()
@@ -236,29 +231,6 @@ object RenderLib {
         }
 
         tess.end()
-    }
-
-    @JvmStatic
-    fun coordToPx(coord: HexCoord, size: Float, offset: Vec2) =
-        Vec2(
-            SQRT_3 * coord.q.toFloat() + SQRT_3 / 2.0f * coord.r.toFloat(),
-            1.5f * coord.r.toFloat()
-        ).scale(size).add(offset)
-
-    @JvmStatic
-    fun pxToCoord(px: Vec2, size: Float, offset: Vec2): HexCoord {
-        val offsetted = px.add(offset.negated())
-        var qf = (SQRT_3 / 3.0f * offsetted.x - 0.33333f * offsetted.y) / size
-        var rf = (0.66666f * offsetted.y) / size
-
-        val q = qf.roundToInt()
-        val r = rf.roundToInt()
-        qf -= q
-        rf -= r
-        return if (q.absoluteValue >= r.absoluteValue)
-            HexCoord(q + (qf + 0.5f * rf).roundToInt(), r)
-        else
-            HexCoord(q, r + (rf + 0.5 * qf).roundToInt())
     }
 
     fun dodge(n: Int): Float = n * 0.9f
