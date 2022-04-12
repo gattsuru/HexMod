@@ -70,6 +70,9 @@ public class HexItems {
     public static final RegistryObject<ItemArtifact> ARTIFACT = ITEMS.register("artifact",
         () -> new ItemArtifact(unstackable()));
 
+    public static final RegistryObject<ItemFiber> FIBER = ITEMS.register("fiber",
+        () -> new ItemFiber(props()));
+
     public static final RegistryObject<ItemManaBattery> BATTERY = ITEMS.register("battery",
         () -> new ItemManaBattery(new Item.Properties().stacksTo(1)));
 

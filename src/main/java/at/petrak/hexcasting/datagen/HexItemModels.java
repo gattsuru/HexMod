@@ -27,6 +27,7 @@ public class HexItemModels extends PaucalItemModelProvider {
         simpleItem(HexItems.CHARGED_AMETHYST.get());
         simpleItem(HexItems.SUBMARINE_SANDWICH.get());
         simpleItem(HexItems.ABACUS.get());
+        simpleItem(HexItems.FIBER.get());
 
         simpleItem(modLoc("scroll_pristine"));
         simpleItem(modLoc("scroll_ancient"));
@@ -40,11 +41,11 @@ public class HexItemModels extends PaucalItemModelProvider {
 
         simpleItem(HexItems.SCRYING_LENS.get());
         getBuilder(HexItems.SCRYING_LENS.get().getRegistryName().getPath())
-                .transforms()
-                .transform(ModelBuilder.Perspective.HEAD)
-                .rotation(0f, 0f, 0f)
-                .translation(-2.5f, 0f, -8f)
-                .scale(0.4f);
+            .transforms()
+            .transform(ModelBuilder.Perspective.HEAD)
+            .rotation(0f, 0f, 0f)
+            .translation(-2.5f, 0f, -8f)
+            .scale(0.4f);
 
         singleTexture(HexItems.WAND.getId().getPath(), new ResourceLocation("item/handheld_rod"),
             "layer0", new ResourceLocation(HexMod.MOD_ID, "item/" + HexItems.WAND.getId().getPath()));
