@@ -31,7 +31,7 @@ interface Operator {
     val isGreat: Boolean get() = false
 
     companion object {
-        // I see why vzakii did this: you can't raycast out to infinity!
+        // I see why vazkii did this: you can't raycast out to infinity!
         const val MAX_DISTANCE: Double = 32.0
         const val MAX_DISTANCE_FROM_SENTINEL: Double = 16.0
 

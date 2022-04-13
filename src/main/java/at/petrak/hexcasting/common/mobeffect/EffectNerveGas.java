@@ -1,6 +1,6 @@
 package at.petrak.hexcasting.common.mobeffect;
 
-import at.petrak.hexcasting.common.lib.HexDamageSources;
+import at.petrak.hexcasting.api.utils.HexDamageSources;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.entity.LivingEntity;
