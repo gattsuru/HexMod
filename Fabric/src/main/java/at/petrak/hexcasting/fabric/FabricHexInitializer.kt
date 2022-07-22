@@ -17,6 +17,7 @@ import at.petrak.hexcasting.common.misc.Brainsweeping
 import at.petrak.hexcasting.common.misc.PlayerPositionRecorder
 import at.petrak.hexcasting.common.recipe.HexRecipeSerializers
 import at.petrak.hexcasting.fabric.event.VillagerConversionCallback
+import at.petrak.hexcasting.fabric.interop.gravity.OpChangeGravity
 import at.petrak.hexcasting.fabric.network.FabricPacketHandler
 import at.petrak.hexcasting.fabric.recipe.FabricUnsealedIngredient
 import at.petrak.hexcasting.fabric.storage.FabricImpetusStorage
@@ -75,6 +76,7 @@ object FabricHexInitializer : ModInitializer {
 
         ServerTickEvents.END_WORLD_TICK.register(PlayerPositionRecorder::updateAllPlayers)
         ServerTickEvents.END_WORLD_TICK.register(OpFlight::fabricTickDownAllFlight)
+        ServerTickEvents.END_WORLD_TICK.register(OpChangeGravity::fabricTickDownAllGravityChanges)
 
         CommandRegistrationCallback.EVENT.register { dp, _ -> HexCommands.register(dp) }
 

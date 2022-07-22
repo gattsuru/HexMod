@@ -6,6 +6,7 @@ import at.petrak.hexcasting.api.addldata.DataHolder;
 import at.petrak.hexcasting.api.addldata.HexHolder;
 import at.petrak.hexcasting.api.addldata.ManaHolder;
 import at.petrak.hexcasting.api.misc.FrozenColorizer;
+import at.petrak.hexcasting.api.misc.GravitySetting;
 import at.petrak.hexcasting.api.mod.HexItemTags;
 import at.petrak.hexcasting.api.player.FlightAbility;
 import at.petrak.hexcasting.api.player.Sentinel;
@@ -137,6 +138,17 @@ public class ForgeXplatImpl implements IXplatAbstractions {
             tag.remove(TAG_FLIGHT_DIMENSION);
             tag.remove(TAG_FLIGHT_RADIUS);
         }
+    }
+
+    public void setGravitySetting(Entity target, GravitySetting setting)
+    {
+        // Does not exist in FORGE ecosystem.
+    }
+
+    public GravitySetting getGravitySetting(Entity target)
+    {
+        // Does not exist in FORGE ecosystem.
+        return GravitySetting.deny();
     }
 
     @Override
