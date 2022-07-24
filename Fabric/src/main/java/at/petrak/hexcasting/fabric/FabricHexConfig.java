@@ -143,7 +143,7 @@ public class FabricHexConfig {
 
                 .beginValue("gridSnapThreshold", ConfigTypes.DOUBLE, DEFAULT_GRID_SNAP_THRESHOLD)
                 .withComment(
-                    "When using a staff, the distance from one dot you have to go to snap to the next dot, where 0.5 means 50% of the way.")
+                    "When using a staff, the distance from one dot you have to go to snap to the next dot, where 0.5 means 50% of the way.  Valid range is 0.5 to 1.0; lower or higher may cause client-side crashes")
                 .finishValue(gridSnapThreshold::mirror)
 
             ;
@@ -200,7 +200,7 @@ public class FabricHexConfig {
 
                 .fork("Spell Circles")
                 .beginValue("maxSpellCircleLength", ConfigTypes.NATURAL, DEFAULT_MAX_SPELL_CIRCLE_LENGTH)
-                .withComment("The maximum number of slates in a spell circle")
+                .withComment("The maximum number of slates in a spell circle.  Must be at least 4.")
                 .finishValue(maxSpellCircleLength::mirror)
 
                 .beginValue("circleActionDenyList", ConfigTypes.makeList(ConfigTypes.STRING), List.of())

@@ -7,6 +7,8 @@ import at.petrak.hexcasting.api.spell.casting.CastingContext
 import at.petrak.hexcasting.api.spell.mishaps.MishapNotEnoughArgs
 import at.petrak.hexcasting.xplat.IXplatAbstractions
 import me.andrew.gravitychanger.api.GravityChangerAPI
+import net.minecraft.client.multiplayer.ClientLevel
+import net.minecraft.client.player.LocalPlayer
 import net.minecraft.core.Direction
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
@@ -18,6 +20,14 @@ import kotlin.math.roundToInt
 object OpChangeGravity : SpellOperator {
     override val argc = 2
     val maxArgc = 3
+
+    class EntitiesWithGravitas {
+        companion object
+        {
+            val ActiveGravityTimers = mutableListOf<Entity>()
+            val TimersToRemove = mutableListOf<Entity>()
+        }
+    }
 
     override fun consumeFromStack(stack: MutableList<SpellDatum<*>>, ctx: CastingContext): List<SpellDatum<*>>
     {
@@ -85,33 +95,41 @@ object OpChangeGravity : SpellOperator {
                     permanent,
                     time
             ))
+            if(!permanent)
+            {
+                EntitiesWithGravitas.ActiveGravityTimers.add(target)
+            }
         }
     }
 
-    private fun tickDownGravity(entity: Entity)
-    {
+    private fun tickDownGravity(entity: Entity) {
         val gravity = IXplatAbstractions.INSTANCE.getGravitySetting(entity);
-        if (gravity.gravityDirection != null && gravity.gravityDirection != Direction.DOWN)
-        {
-            if(!gravity.permanent) {
+        if (gravity != null && gravity.gravityDirection != null) {
+            if (gravity.gravityDirection == Direction.DOWN || !entity.isAlive)
+            {
+                GravityChangerAPI.setDefaultGravityDirection(entity, Direction.DOWN)
+                EntitiesWithGravitas.TimersToRemove.add(entity);
+            }
+            else if (!gravity.permanent) {
                 val gravityTime = gravity.timeLeft - 1
                 if (gravityTime < 0) {
+                    GravityChangerAPI.setDefaultGravityDirection(entity, Direction.DOWN)
                     IXplatAbstractions.INSTANCE.setGravitySetting(entity, GravitySetting.deny())
                 } else {
                     IXplatAbstractions.INSTANCE.setGravitySetting(
-                            entity,
-                            GravitySetting(
-                                    gravity.gravityDirection,
-                                    gravity.permanent,
-                                    gravityTime
-                            )
+                        entity,
+                        GravitySetting(
+                            gravity.gravityDirection,
+                            gravity.permanent,
+                            gravityTime
+                        )
                     )
                 }
             }
-            if(entity.y > 10000)
+            if(entity.y > 5000)
             {
                 if(entity is ServerPlayer) {
-                    entity.hurt(DamageSource.OUT_OF_WORLD, 5f)
+                    entity.hurt(DamageSource.OUT_OF_WORLD, 1f)
                 }
                 else
                 {
@@ -123,8 +141,27 @@ object OpChangeGravity : SpellOperator {
 
     fun fabricTickDownAllGravityChanges(world: ServerLevel)
     {
-        for (entity in world.allEntities) {
+        for (entity in EntitiesWithGravitas.ActiveGravityTimers) {
             tickDownGravity(entity);
+        }
+        // Have to do this as a separate step, as it's unsafe to modify a list within its iterator.
+        EntitiesWithGravitas.ActiveGravityTimers.removeAll(EntitiesWithGravitas.TimersToRemove)
+    }
+
+    fun fabricRespawnNormalGrav(world: ClientLevel)
+    {
+        // Only player respawn event is in Architect, which we don't (yet) depend on.
+        // Thus, this mess.  Thankfully, cpu impact should be minimal, even running 20hz.
+        for (player in world.players()) {
+            // This method can only ever fire on the client side; the code below would never run but probably wouldn't be optimized out.
+            // Included for clarity.
+            //if (player !is LocalPlayer)
+            //    continue
+            // And, yes, this is the best test available short of adding network communications;
+            // neither GravityAPI nor CardinalComponents syncs their data.
+            if(player.isDeadOrDying){
+                GravityChangerAPI.setDefaultGravityDirection(player, Direction.DOWN)
+            }
         }
     }
 }

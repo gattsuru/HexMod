@@ -22,8 +22,10 @@ import at.petrak.hexcasting.fabric.network.FabricPacketHandler
 import at.petrak.hexcasting.fabric.recipe.FabricUnsealedIngredient
 import at.petrak.hexcasting.fabric.storage.FabricImpetusStorage
 import at.petrak.hexcasting.interop.HexInterop
+import at.petrak.hexcasting.xplat.IXplatAbstractions
 import io.github.tropheusj.serialization_hooks.ingredient.IngredientDeserializer
 import net.fabricmc.api.ModInitializer
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 import net.fabricmc.fabric.api.event.player.AttackBlockCallback
@@ -77,6 +79,10 @@ object FabricHexInitializer : ModInitializer {
         ServerTickEvents.END_WORLD_TICK.register(PlayerPositionRecorder::updateAllPlayers)
         ServerTickEvents.END_WORLD_TICK.register(OpFlight::fabricTickDownAllFlight)
         ServerTickEvents.END_WORLD_TICK.register(OpChangeGravity::fabricTickDownAllGravityChanges)
+        // Can register server ticks on a (dedicated) client, but not client ticks on a (dedicated) server.
+        if (IXplatAbstractions.INSTANCE.isPhysicalClient) {
+            ClientTickEvents.END_WORLD_TICK.register(OpChangeGravity::fabricRespawnNormalGrav)
+        }
 
         CommandRegistrationCallback.EVENT.register { dp, _ -> HexCommands.register(dp) }
 

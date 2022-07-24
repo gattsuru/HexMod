@@ -1,6 +1,7 @@
 package at.petrak.hexcasting.fabric.cc;
 
 import at.petrak.hexcasting.api.misc.GravitySetting;
+import at.petrak.hexcasting.fabric.interop.gravity.OpChangeGravity;
 import dev.onyxstudios.cca.api.v3.component.Component;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -44,6 +45,10 @@ public class CCGravity implements Component
             var permanent = tag.getBoolean(TAG_PERMANENT);
             var timeLeft = tag.getInt(TAG_TIME_LEFT);
             this.gravitySetting = new GravitySetting(Direction.from2DDataValue(dirNum), permanent, timeLeft);
+            if(!permanent)
+            {
+                OpChangeGravity.EntitiesWithGravitas.Companion.getActiveGravityTimers().add(owner);
+            }
         }
     }
 
