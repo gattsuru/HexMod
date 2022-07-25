@@ -130,11 +130,13 @@ public class FabricHexConfig {
         private final PropertyMirror<Boolean> ctrlTogglesOffStrokeOrder = PropertyMirror.create(ConfigTypes.BOOLEAN);
         private final PropertyMirror<Double> gridSnapThreshold = PropertyMirror.create(
             ConfigTypes.DOUBLE.withMinimum(0.5).withMaximum(1.0));
+        private final PropertyMirror<Boolean> invertSpellbookScrollDirection = PropertyMirror.create(ConfigTypes.BOOLEAN);
+        private final PropertyMirror<Boolean> invertAbacusScrollDirection = PropertyMirror.create(ConfigTypes.BOOLEAN);
 
         public ConfigTree configure(ConfigTreeBuilder bob) {
             bob
                 .beginValue("patternPointSpeedMultiplier", ConfigTypes.DOUBLE, DEFAULT_PATTERN_POINT_SPEED_MULTIPLIER)
-                .withComment("How fast the point showing you the stroke order on patterns moves")
+                .withComment("How fast the point showing you the stroke order on patterns moves.  Must be positive.")
                 .finishValue(patternPointSpeedMultiplier::mirror)
 
                 .beginValue("ctrlTogglesOffStrokeOrder", ConfigTypes.BOOLEAN, DEFAULT_CTRL_TOGGLES_OFF_STROKE_ORDER)
@@ -143,8 +145,16 @@ public class FabricHexConfig {
 
                 .beginValue("gridSnapThreshold", ConfigTypes.DOUBLE, DEFAULT_GRID_SNAP_THRESHOLD)
                 .withComment(
-                    "When using a staff, the distance from one dot you have to go to snap to the next dot, where 0.5 means 50% of the way.  Valid range is 0.5 to 1.0; lower or higher may cause client-side crashes")
+                    "When using a staff, the distance from one dot you have to go to snap to the next dot, where 0.5 means 50% of the way.  Valid range is 0.5 to 1.0, and may cause client crashes if set above or below those values.")
                 .finishValue(gridSnapThreshold::mirror)
+
+                .beginValue("invertSpellbookScrollDirection", ConfigTypes.BOOLEAN, DEFAULT_INVERT_SPELLBOOK_SCROLL)
+                .withComment("Whether scrolling up (as opposed to down) will increase the page index of the spellbook, and vice versa")
+                .finishValue(invertSpellbookScrollDirection::mirror)
+
+                .beginValue("invertAbacusScrollDirection", ConfigTypes.BOOLEAN, DEFAULT_INVERT_ABACUS_SCROLL)
+                .withComment("Whether scrolling up (as opposed to down) will increase the value of the abacus, and vice versa")
+                .finishValue(invertAbacusScrollDirection::mirror)
 
             ;
 
@@ -159,6 +169,16 @@ public class FabricHexConfig {
         @Override
         public boolean ctrlTogglesOffStrokeOrder() {
             return ctrlTogglesOffStrokeOrder.getValue();
+        }
+
+        @Override
+        public boolean invertSpellbookScrollDirection() {
+            return invertSpellbookScrollDirection.getValue();
+        }
+
+        @Override
+        public boolean invertAbacusScrollDirection() {
+            return invertAbacusScrollDirection.getValue();
         }
 
         @Override

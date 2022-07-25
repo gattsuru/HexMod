@@ -10,6 +10,7 @@ import at.petrak.hexcasting.common.casting.operators.spells.great.OpFlight
 import at.petrak.hexcasting.common.command.PatternResLocArgument
 import at.petrak.hexcasting.common.entities.HexEntities
 import at.petrak.hexcasting.common.items.ItemJewelerHammer
+import at.petrak.hexcasting.common.items.ItemLens
 import at.petrak.hexcasting.common.lib.*
 import at.petrak.hexcasting.common.loot.HexLootHandler
 import at.petrak.hexcasting.common.misc.AkashicTreeGrower
@@ -77,6 +78,8 @@ object FabricHexInitializer : ModInitializer {
         }
 
         ServerTickEvents.END_WORLD_TICK.register(PlayerPositionRecorder::updateAllPlayers)
+        ServerTickEvents.END_WORLD_TICK.register(ItemLens::tickAllPlayers)
+        ServerTickEvents.END_WORLD_TICK.register(OpFlight::tickAllPlayers)
         ServerTickEvents.END_WORLD_TICK.register(OpFlight::fabricTickDownAllFlight)
         ServerTickEvents.END_WORLD_TICK.register(OpChangeGravity::fabricTickDownAllGravityChanges)
         // Can register server ticks on a (dedicated) client, but not client ticks on a (dedicated) server.
@@ -108,7 +111,10 @@ object FabricHexInitializer : ModInitializer {
 
         HexLootFunctions.registerSerializers(bind(Registry.LOOT_FUNCTION_TYPE))
 
-        AkashicTreeGrower.INSTANCE
+        // Because of Java's lazy-loading of classes, can't use Kotlin static initialization for
+        // any calls that will eventually touch FeatureUtils.register(), as the growers here do,
+        // unless the class is called in this initialization step.
+        AkashicTreeGrower.init()
 
         // Done with soft implements in forge
         val flameOn = FlammableBlockRegistry.getDefaultInstance()
