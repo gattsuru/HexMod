@@ -4,22 +4,26 @@ import at.petrak.hexcasting.api.misc.GravitySetting
 import at.petrak.hexcasting.api.misc.ManaConstants
 import at.petrak.hexcasting.api.spell.*
 import at.petrak.hexcasting.api.spell.casting.CastingContext
+import at.petrak.hexcasting.api.spell.mishaps.MishapImmuneEntity
+import at.petrak.hexcasting.api.spell.mishaps.MishapInvalidSpellDatumType
 import at.petrak.hexcasting.api.spell.mishaps.MishapNotEnoughArgs
 import at.petrak.hexcasting.xplat.IXplatAbstractions
 import me.andrew.gravitychanger.api.GravityChangerAPI
 import net.minecraft.client.multiplayer.ClientLevel
-import net.minecraft.client.player.LocalPlayer
 import net.minecraft.core.Direction
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
-import net.minecraft.world.damagesource.DamageSource
 import net.minecraft.world.entity.Entity
 import net.minecraft.world.phys.Vec3
+import kotlin.math.abs
+import kotlin.math.max
 import kotlin.math.roundToInt
 
 object OpChangeGravity : SpellOperator {
     override val argc = 2
-    val maxArgc = 3
+    private const val maxArgc = 3
+    private const val maxPlayerGravityTravelXZDistance = 16 * 25
+    private const val maxEntityGravityCeilingDistance = 2000
 
     class EntitiesWithGravitas {
         companion object
@@ -31,19 +35,32 @@ object OpChangeGravity : SpellOperator {
 
     override fun consumeFromStack(stack: MutableList<SpellDatum<*>>, ctx: CastingContext): List<SpellDatum<*>>
     {
-        if (this.argc > stack.size)
-            throw MishapNotEnoughArgs(this.argc, stack.size)
-        val twoArgs = stack.takeLast(argc)
-        if(twoArgs[0].payload == ctx.caster)
-        {
-            for (_i in 0 until argc) stack.removeLast()
-            return twoArgs
-        }
-        else
+        if(stack.size >= maxArgc)
         {
             val threeArgs = stack.takeLast(maxArgc)
             for (_i in 0 until maxArgc) stack.removeLast()
             return threeArgs
+        }
+        else if (stack.size == this.argc) {
+            val twoArgs = stack.takeLast(argc)
+            if (twoArgs[0].payload == ctx.caster || twoArgs[0].payload !is ServerPlayer) {
+                for (_i in 0 until argc) stack.removeLast()
+                return twoArgs
+            }
+            else
+            {
+                if(twoArgs[0].payload is Entity) {
+                    throw MishapImmuneEntity(twoArgs[0].payload as Entity)
+                }
+                else
+                {
+                    throw MishapInvalidSpellDatumType(twoArgs[0].payload)
+                }
+            }
+        }
+        else
+        {
+            throw MishapNotEnoughArgs(this.argc, stack.size)
         }
     }
 
@@ -56,26 +73,24 @@ object OpChangeGravity : SpellOperator {
         val infiniteDuration: Boolean
         val manaCost: Int
 
-        // If casting on self, use the permanent two-arg version
-        // We've already checked once during the arg consume phase, but this is cleaner than trusting counts.
-        if (target == ctx.caster)
+        if(args.count() >= 3) {
+            val timeRaw = args.getChecked<Double>(2)
+            //We'll 'charge' for duration even if Direction.DOWN, but treat it as an infinite duration anyway; as if it 'finished' to normal gravity.
+            infiniteDuration = snapped == Direction.DOWN
+            manaCost = ManaConstants.DUST_UNIT * (0.20 * (max(timeRaw, 1.0))).roundToInt()
+            time = timeRaw * 20.0
+        }
+        else if((target is ServerPlayer && target != ctx.caster))
+        {
+            // ServerPlayer extends target, so no need for a separate 'is' check here.
+            // Possibly make a configurable setting to allow infinite duration gravity changes to other players, disallow against monsters?
+            throw MishapImmuneEntity(target)
+        }
+        else
         {
             infiniteDuration = true
             time = -1.0
             manaCost = ManaConstants.CRYSTAL_UNIT * 10
-        }
-        else // if casting on anything else, use the three-arg version.
-        // Shouldn't be possible to get less than two-args here, but I'm paranoid.
-        {
-            val timeRaw = if(args.count() >= 3) {
-                args.getChecked<Double>(2)
-            } else {
-                throw MishapNotEnoughArgs(this.argc + 1, 2)
-            }
-            //We'll 'charge' for duration even if Direction.DOWN, but treat it as an infinite duration anyway; as if it 'finished' to normal gravity.
-            infiniteDuration = snapped == Direction.DOWN
-            manaCost = ManaConstants.DUST_UNIT * (0.20 * (timeRaw + 1.0)).roundToInt()
-            time = timeRaw * 20.0;
         }
 
         return Triple(
@@ -93,9 +108,10 @@ object OpChangeGravity : SpellOperator {
             GravitySetting(
                     dir,
                     permanent,
-                    time
+                    time,
+                    Vec3(target.x, target.y, target.z)
             ))
-            if(!permanent)
+            if(!permanent || target is ServerPlayer)
             {
                 EntitiesWithGravitas.ActiveGravityTimers.add(target)
             }
@@ -103,12 +119,13 @@ object OpChangeGravity : SpellOperator {
     }
 
     private fun tickDownGravity(entity: Entity) {
-        val gravity = IXplatAbstractions.INSTANCE.getGravitySetting(entity);
+        val gravity = IXplatAbstractions.INSTANCE.getGravitySetting(entity)
         if (gravity != null && gravity.gravityDirection != null) {
             if (gravity.gravityDirection == Direction.DOWN || !entity.isAlive)
             {
                 GravityChangerAPI.setDefaultGravityDirection(entity, Direction.DOWN)
-                EntitiesWithGravitas.TimersToRemove.add(entity);
+                EntitiesWithGravitas.TimersToRemove.add(entity)
+                return
             }
             else if (!gravity.permanent) {
                 val gravityTime = gravity.timeLeft - 1
@@ -121,20 +138,23 @@ object OpChangeGravity : SpellOperator {
                         GravitySetting(
                             gravity.gravityDirection,
                             gravity.permanent,
-                            gravityTime
+                            gravityTime,
+                            gravity.origin
                         )
                     )
                 }
             }
-            if(entity.y > 5000)
+            if(entity is ServerPlayer)
             {
-                if(entity is ServerPlayer) {
-                    entity.hurt(DamageSource.OUT_OF_WORLD, 1f)
-                }
-                else
+                if(entity.y > maxEntityGravityCeilingDistance || abs(entity.x - gravity.origin.x) > maxPlayerGravityTravelXZDistance || abs(entity.z - gravity.origin.z) > maxPlayerGravityTravelXZDistance)
                 {
-                    entity.remove(Entity.RemovalReason.DISCARDED);
+                    GravityChangerAPI.setDefaultGravityDirection(entity, Direction.DOWN)
+                    IXplatAbstractions.INSTANCE.setGravitySetting(entity, GravitySetting.deny())
                 }
+            }
+            else if(entity.y > maxEntityGravityCeilingDistance)
+            {
+                entity.remove(Entity.RemovalReason.DISCARDED)
             }
         }
     }
@@ -142,10 +162,11 @@ object OpChangeGravity : SpellOperator {
     fun fabricTickDownAllGravityChanges(world: ServerLevel)
     {
         for (entity in EntitiesWithGravitas.ActiveGravityTimers) {
-            tickDownGravity(entity);
+            tickDownGravity(entity)
         }
         // Have to do this as a separate step, as it's unsafe to modify a list within its iterator.
         EntitiesWithGravitas.ActiveGravityTimers.removeAll(EntitiesWithGravitas.TimersToRemove)
+        EntitiesWithGravitas.TimersToRemove.clear()
     }
 
     fun fabricRespawnNormalGrav(world: ClientLevel)

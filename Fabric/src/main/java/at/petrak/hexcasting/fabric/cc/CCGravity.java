@@ -1,18 +1,21 @@
 package at.petrak.hexcasting.fabric.cc;
 
 import at.petrak.hexcasting.api.misc.GravitySetting;
+import at.petrak.hexcasting.api.utils.HexUtils;
 import at.petrak.hexcasting.fabric.interop.gravity.OpChangeGravity;
 import dev.onyxstudios.cca.api.v3.component.Component;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.phys.Vec3;
 
 public class CCGravity implements Component
 {
     public static final String
       TAG_DIRECTION   = "direction",
       TAG_TIME_LEFT = "time_left",
-      TAG_PERMANENT = "permanent";
+      TAG_PERMANENT = "permanent",
+      TAG_ORIGIN = "origin";
 
     final Entity owner;
     private       GravitySetting gravitySetting = GravitySetting.deny();
@@ -42,9 +45,18 @@ public class CCGravity implements Component
         }
         else
         {
-            var permanent = tag.getBoolean(TAG_PERMANENT);
-            var timeLeft = tag.getInt(TAG_TIME_LEFT);
-            this.gravitySetting = new GravitySetting(Direction.from2DDataValue(dirNum), permanent, timeLeft);
+            final var permanent = tag.getBoolean(TAG_PERMANENT);
+            final var timeLeft = tag.getInt(TAG_TIME_LEFT);
+            final Vec3 origin;
+            if(tag.contains(TAG_ORIGIN))  //LongArrays are not guaranteed to resolve to length > 0, where other caps give valid resolving results.
+            {
+                origin = HexUtils.vecFromNBT(tag.getLongArray(TAG_ORIGIN));
+            }
+            else
+            {
+                origin = new Vec3(0, 0, 0);
+            }
+            this.gravitySetting = new GravitySetting(Direction.from2DDataValue(dirNum), permanent, timeLeft, origin);
             if(!permanent)
             {
                 OpChangeGravity.EntitiesWithGravitas.Companion.getActiveGravityTimers().add(owner);

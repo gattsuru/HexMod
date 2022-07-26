@@ -80,7 +80,6 @@ object FabricHexInitializer : ModInitializer {
         ServerTickEvents.END_WORLD_TICK.register(PlayerPositionRecorder::updateAllPlayers)
         ServerTickEvents.END_WORLD_TICK.register(ItemLens::tickAllPlayers)
         ServerTickEvents.END_WORLD_TICK.register(OpFlight::tickAllPlayers)
-        ServerTickEvents.END_WORLD_TICK.register(OpFlight::fabricTickDownAllFlight)
         ServerTickEvents.END_WORLD_TICK.register(OpChangeGravity::fabricTickDownAllGravityChanges)
         // Can register server ticks on a (dedicated) client, but not client ticks on a (dedicated) server.
         if (IXplatAbstractions.INSTANCE.isPhysicalClient) {
