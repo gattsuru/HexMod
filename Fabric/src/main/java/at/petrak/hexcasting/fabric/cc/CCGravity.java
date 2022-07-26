@@ -47,15 +47,8 @@ public class CCGravity implements Component
         {
             final var permanent = tag.getBoolean(TAG_PERMANENT);
             final var timeLeft = tag.getInt(TAG_TIME_LEFT);
-            final Vec3 origin;
-            if(tag.contains(TAG_ORIGIN))  //LongArrays are not guaranteed to resolve to length > 0, where other caps give valid resolving results.
-            {
-                origin = HexUtils.vecFromNBT(tag.getLongArray(TAG_ORIGIN));
-            }
-            else
-            {
-                origin = new Vec3(0, 0, 0);
-            }
+            // HexUtils does check these for valid positions, and returns a 3-zeros vector if not populated.
+            final Vec3 origin = HexUtils.vecFromNBT(tag.getLongArray(TAG_ORIGIN));
             this.gravitySetting = new GravitySetting(Direction.from2DDataValue(dirNum), permanent, timeLeft, origin);
             if(!permanent)
             {
