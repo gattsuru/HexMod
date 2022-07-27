@@ -20,6 +20,9 @@ public class HexInterop {
     public static final class Fabric {
         public static final String GRAVITY_CHANGER_API_ID = "gravitychanger";
         public static final String TRINKETS_API_ID = "trinkets";
+        public static final String REQUIEM_API_ID = "requiem";
+        // Should we use "requiemapi"?  The current checks don't need to occur unless the full mod is loaded,
+        // but I could see that changing (eg, add a staff-cast to start possessing a mob without the Remnant system).
     }
 
     public static void init() {
