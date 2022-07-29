@@ -541,7 +541,7 @@ public abstract class BlockEntityAbstractImpetus extends HexBlockEntity implemen
     @Override
     public boolean canPlaceItem(int index, ItemStack stack) {
         var manamount = extractManaFromItem(stack, true);
-        return manamount > 0;
+        return manamount > 0 || stack.is(HexItems.CREATIVE_UNLOCKER);
     }
 
     public int extractManaFromItem(ItemStack stack, boolean simulate) {
