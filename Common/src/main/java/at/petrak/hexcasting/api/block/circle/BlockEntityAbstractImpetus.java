@@ -15,7 +15,6 @@ import at.petrak.hexcasting.common.lib.HexItems;
 import at.petrak.hexcasting.common.lib.HexSounds;
 import at.petrak.hexcasting.xplat.IXplatAbstractions;
 import com.mojang.datafixers.util.Pair;
-import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -36,6 +35,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -115,7 +115,7 @@ public abstract class BlockEntityAbstractImpetus extends HexBlockEntity implemen
 
     public void applyScryingLensOverlay(List<Pair<ItemStack, Component>> lines,
         BlockState state, BlockPos pos,
-        LocalPlayer observer, ClientLevel world,
+        LocalPlayer observer, Level world,
         Direction hitFace) {
         if (world.getBlockEntity(pos) instanceof BlockEntityAbstractImpetus beai) {
             if (beai.getMana() < 0) {
@@ -541,7 +541,7 @@ public abstract class BlockEntityAbstractImpetus extends HexBlockEntity implemen
     @Override
     public boolean canPlaceItem(int index, ItemStack stack) {
         var manamount = extractManaFromItem(stack, true);
-        return manamount > 0;
+        return manamount > 0 || stack.is(HexItems.CREATIVE_UNLOCKER);
     }
 
     public int extractManaFromItem(ItemStack stack, boolean simulate) {
