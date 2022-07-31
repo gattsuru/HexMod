@@ -38,10 +38,12 @@ object OpChangeGravity : SpellOperator {
         if(stack.size >= maxArgc)
         {
             val threeArgs = stack.takeLast(maxArgc)
-            for (_i in 0 until maxArgc) stack.removeLast()
-            return threeArgs
+            if(threeArgs[2].payload is Number) {
+                for (_i in 0 until maxArgc) stack.removeLast()
+                return threeArgs
+            }
         }
-        else if (stack.size == this.argc) {
+        if (stack.size >= this.argc) {
             val twoArgs = stack.takeLast(argc)
             if (twoArgs[0].payload == ctx.caster || twoArgs[0].payload !is ServerPlayer) {
                 for (_i in 0 until argc) stack.removeLast()
@@ -58,10 +60,7 @@ object OpChangeGravity : SpellOperator {
                 }
             }
         }
-        else
-        {
-            throw MishapNotEnoughArgs(this.argc, stack.size)
-        }
+        throw MishapNotEnoughArgs(this.argc, stack.size)
     }
 
     override fun execute(args: List<SpellDatum<*>>, ctx: CastingContext):
@@ -90,7 +89,7 @@ object OpChangeGravity : SpellOperator {
         {
             infiniteDuration = true
             time = -1.0
-            manaCost = ManaConstants.CRYSTAL_UNIT * 10
+            manaCost = ManaConstants.CRYSTAL_UNIT * 1
         }
 
         return Triple(

@@ -40,10 +40,11 @@ data class CastingContext(
     private val entitiesGivenMotion = mutableSetOf<Entity>()
 
     inline fun getHeldItemToOperateOn(acceptItemIf: (ItemStack) -> Boolean): Pair<ItemStack, InteractionHand> {
-        val handItem = caster.getItemInHand(castingHand)
-        if (!acceptItemIf(handItem))
-            return caster.getItemInHand(otherHand) to otherHand
-        return handItem to castingHand
+
+        val otherHandItem = caster.getItemInHand(otherHand)
+        if (!acceptItemIf(otherHandItem))
+            return caster.getItemInHand(castingHand) to castingHand
+        return otherHandItem to otherHand
     }
 
     /**

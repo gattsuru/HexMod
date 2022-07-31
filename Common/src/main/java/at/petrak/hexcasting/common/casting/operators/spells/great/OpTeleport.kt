@@ -95,14 +95,18 @@ object OpTeleport : SpellOperator {
             // this handles teleporting the passengers
             val target = base!!.position().add(delta)
             base.teleportTo(target.x, target.y, target.z)
-        } else {
+        } else if(base != null){
             // Break it into two stacks
             teleportee.stopRiding()
             teleportee.firstPassenger?.stopRiding()
             teleportee.setPos(teleportee.position().add(delta))
         }
+        else
+        {
+            teleportee.setPos(teleportee.position().add(delta))
+        }
 
-        teleportee.setPos(teleportee.position().add(delta))
+
         if (teleportee is ServerPlayer) {
             teleportee.connection.resetPosition()
             IXplatAbstractions.INSTANCE.sendPacketToPlayer(teleportee, MsgBlinkAck(delta))
