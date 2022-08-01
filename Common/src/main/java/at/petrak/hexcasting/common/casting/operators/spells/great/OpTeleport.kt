@@ -112,6 +112,9 @@ object OpTeleport : SpellOperator {
         else
         {
             teleportee.setPos(teleportee.position().add(delta))
+            if (teleportee is ServerPlayer) {
+                playersToUpdate.add(teleportee)
+            }
         }
 
         for (player in playersToUpdate) {

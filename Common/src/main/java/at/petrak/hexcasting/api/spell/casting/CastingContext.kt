@@ -40,10 +40,14 @@ data class CastingContext(
     private val entitiesGivenMotion = mutableSetOf<Entity>()
 
     inline fun getHeldItemToOperateOn(acceptItemIf: (ItemStack) -> Boolean): Pair<ItemStack, InteractionHand> {
-
+        // This method is used to determine handed checks for Erase/Colorize/Read/Write/etc.
+        // Because of this, the returned and hand must support being thrown away.
         val otherHandItem = caster.getItemInHand(otherHand)
-        if (!acceptItemIf(otherHandItem))
-            return caster.getItemInHand(castingHand) to castingHand
+        val castingHandItem = caster.getItemInHand(castingHand)
+        if (acceptItemIf(otherHandItem))
+            return otherHandItem to otherHand
+        if (acceptItemIf(castingHandItem))
+            return castingHandItem to castingHand
         return otherHandItem to otherHand
     }
 
