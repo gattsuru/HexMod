@@ -146,8 +146,6 @@ sealed interface ContinuationFrame {
 
             // If we still have data to process...
             val (stackTop, newCont) = if (data.nonEmpty) {
-                // Increment the evaluation depth,
-                harness.ctx.incDepth()
                 // push the next datum to the top of the stack,
                 data.car to continuation
                     // put the next Thoth object back on the stack for the next Thoth cycle,

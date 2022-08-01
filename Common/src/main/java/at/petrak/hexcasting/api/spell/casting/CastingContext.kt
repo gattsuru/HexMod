@@ -49,8 +49,8 @@ data class CastingContext(
     /**
      * Throws if we get too deep.
      */
-    fun incDepth() {
-        this.depth++
+    fun incDepth(depthIncrease : Int = 1) {
+        this.depth += depthIncrease
         val maxAllowedDepth = HexConfig.server().maxRecurseDepth()
         if (this.depth > maxAllowedDepth) {
             throw MishapEvalTooDeep()
