@@ -22,6 +22,12 @@ object OpForEach : Operator {
         stack.removeLastOrNull()
         stack.removeLastOrNull()
 
+        // Increment the evaluation depth
+        // This will cause the execution to fail at the start of a knowable overlong Thoth,
+        // Rather than at the iteration of the foreach where it would fall over the top.
+        // But at least it won't explode.
+        ctx.incDepth(datums.count())
+
         val frame = ContinuationFrame.ForEach(datums, instrs, null, mutableListOf())
 
         return OperationResult(
