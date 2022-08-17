@@ -41,7 +41,7 @@ data class CastingContext(
 
     inline fun getHeldItemToOperateOn(acceptItemIf: (ItemStack) -> Boolean): Pair<ItemStack, InteractionHand> {
         // This method is used to determine handed checks for Erase/Colorize/Read/Write/etc.
-        // Because of this, the returned and hand must support being thrown away.
+        // Because of this, the returned item and hand must support being thrown away, eg, can not be the main-hand.
         val otherHandItem = caster.getItemInHand(otherHand)
         val castingHandItem = caster.getItemInHand(castingHand)
         if (acceptItemIf(otherHandItem))
@@ -54,8 +54,8 @@ data class CastingContext(
     /**
      * Throws if we get too deep.
      */
-    fun incDepth(depthIncrease : Int = 1) {
-        this.depth += depthIncrease
+    fun incDepth() {
+        this.depth++
         val maxAllowedDepth = HexConfig.server().maxRecurseDepth()
         if (this.depth > maxAllowedDepth) {
             throw MishapEvalTooDeep()
