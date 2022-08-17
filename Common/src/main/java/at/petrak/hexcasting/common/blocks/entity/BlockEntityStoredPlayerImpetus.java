@@ -5,7 +5,6 @@ import at.petrak.hexcasting.api.utils.NBTHelper;
 import at.petrak.hexcasting.common.lib.HexBlockEntities;
 import com.mojang.authlib.GameProfile;
 import com.mojang.datafixers.util.Pair;
-import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -79,9 +78,9 @@ public class BlockEntityStoredPlayerImpetus extends BlockEntityAbstractImpetus {
     }
 
     public void applyScryingLensOverlay(List<Pair<ItemStack, Component>> lines,
-        BlockState state, BlockPos pos, LocalPlayer observer,
-        Level world,
-        Direction hitFace) {
+										BlockState state, BlockPos pos, Player observer,
+										Level world,
+										Direction hitFace) {
         super.applyScryingLensOverlay(lines, state, pos, observer, world, hitFace);
 
         var name = this.getPlayerName();

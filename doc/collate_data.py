@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from sys import argv, stdout
 from collections import namedtuple
+from html import escape
 import json # codec
 import re # parsing
 import os # listdir
@@ -321,7 +322,7 @@ def parse_book(root, mod_name, book_name):
     return root_info
 
 def tag_args(kwargs):
-    return "".join(f" {'class' if key == 'clazz' else key.replace('_', '-')}={repr(value)}" for key, value in kwargs.items())
+    return "".join(f" {'class' if key == 'clazz' else key.replace('_', '-')}={repr(escape(str(value)))}" for key, value in kwargs.items())
 
 class PairTag:
     __slots__ = ["stream", "name", "kwargs"]
@@ -359,7 +360,7 @@ class Stream:
         with self.pair_tag(name, **kwargs): pass
 
     def text(self, txt):
-        print(txt, file=self.stream, end="")
+        print(escape(txt), file=self.stream, end="")
         return self
 
 def get_format(out, ty, value):
@@ -407,6 +408,14 @@ def write_block(out, block):
         for child in block.children:
             write_block(out, child)
 
+def anchor_toc(out):
+    with out.pair_tag("a", href="#table-of-contents", clazz="permalink small", title="Jump to top"):
+        out.empty_pair_tag("i", clazz="bi bi-box-arrow-up")
+
+def permalink(out, link):
+    with out.pair_tag("a", href=link, clazz="permalink small", title="Permalink"):
+        out.empty_pair_tag("i", clazz="bi bi-link-45deg")
+
 # TODO modularize
 def write_page(out, pageid, page):
     if "anchor" in page:
@@ -418,8 +427,7 @@ def write_page(out, pageid, page):
             with out.pair_tag("h4"):
                 out.text(page.get("header", page.get("title", None)))
                 if anchor_id:
-                    with out.pair_tag("a", href="#" + anchor_id, clazz="permalink small"):
-                        out.empty_pair_tag("i", clazz="bi bi-link-45deg")
+                    permalink(out, "#" + anchor_id)
 
         ty = page["type"]
         if ty == "patchouli:text":
@@ -475,8 +483,7 @@ def write_page(out, pageid, page):
                     suffix = f" ({pipe})" if inp or oup else ""
                     out.text(f"{page['name']}{suffix}")
                     if anchor_id:
-                        with out.pair_tag("a", href="#" + anchor_id, clazz="permalink small"):
-                            out.empty_pair_tag("i", clazz="bi bi-link-45deg")
+                        permalink(out, "#" + anchor_id)
             with out.pair_tag("details", clazz="spell-collapsible"):
                 out.empty_pair_tag("summary", clazz="collapse-spell")
                 for string, start_angle, per_world in page["op"]:
@@ -495,8 +502,8 @@ def write_entry(out, book, entry):
         with out.pair_tag_if(entry_spoilered(book, entry), "div", clazz="spoilered"):
             with out.pair_tag("h3", clazz="entry-title page-header"):
                 write_block(out, entry["name"])
-                with out.pair_tag("a", href="#" + entry["id"], clazz="permalink small"):
-                    out.empty_pair_tag("i", clazz="bi bi-link-45deg")
+                anchor_toc(out)
+                permalink(out, "#" + entry["id"])
             for page in entry["pages"]:
                 write_page(out, entry["id"], page)
 
@@ -505,8 +512,8 @@ def write_category(out, book, category):
         with out.pair_tag_if(category_spoilered(book, category), "div", clazz="spoilered"):
             with out.pair_tag("h2", clazz="category-title page-header"):
                 write_block(out, category["name"])
-                with out.pair_tag("a", href="#" + category["id"], clazz="permalink small"):
-                    out.empty_pair_tag("i", clazz="bi bi-link-45deg")
+                anchor_toc(out)
+                permalink(out, "#" + category["id"])
             write_block(out, category["description"])
         for entry in category["entries"]:
             if entry["id"] not in book["blacklist"]:
@@ -515,10 +522,9 @@ def write_category(out, book, category):
 def write_toc(out, book):
     with out.pair_tag("h2", id="table-of-contents", clazz="page-header"):
         out.text("Table of Contents")
-        with out.pair_tag("a", href="javascript:void(0)", clazz="toggle-link small", data_target="toc-category"):
-            out.text("(toggle all)")
-        with out.pair_tag("a", href="#table-of-contents", clazz="permalink small"):
-            out.empty_pair_tag("i", clazz="bi bi-link-45deg")
+        with out.pair_tag("a", href="javascript:void(0)", clazz="permalink toggle-link small", data_target="toc-category", title="Toggle all"):
+            out.empty_pair_tag("i", clazz="bi bi-list-nested")
+        permalink(out, "#table-of-contents")
     for category in book["categories"]:
         with out.pair_tag("details", clazz="toc-category"):
             with out.pair_tag("summary"):

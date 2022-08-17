@@ -15,7 +15,6 @@ import at.petrak.hexcasting.common.lib.HexItems;
 import at.petrak.hexcasting.common.lib.HexSounds;
 import at.petrak.hexcasting.xplat.IXplatAbstractions;
 import com.mojang.datafixers.util.Pair;
-import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -114,9 +113,9 @@ public abstract class BlockEntityAbstractImpetus extends HexBlockEntity implemen
     }
 
     public void applyScryingLensOverlay(List<Pair<ItemStack, Component>> lines,
-        BlockState state, BlockPos pos,
-        LocalPlayer observer, Level world,
-        Direction hitFace) {
+                                        BlockState state, BlockPos pos,
+                                        Player observer, Level world,
+                                        Direction hitFace) {
         if (world.getBlockEntity(pos) instanceof BlockEntityAbstractImpetus beai) {
             if (beai.getMana() < 0) {
                 lines.add(new Pair<>(new ItemStack(HexItems.AMETHYST_DUST), ItemCreativeUnlocker.infiniteMedia(world)));
@@ -540,6 +539,12 @@ public abstract class BlockEntityAbstractImpetus extends HexBlockEntity implemen
 
     @Override
     public boolean canPlaceItem(int index, ItemStack stack) {
+        if (remainingManaCapacity() == 0)
+            return false;
+
+        if (stack.is(HexItems.CREATIVE_UNLOCKER))
+            return true;
+
         var manamount = extractManaFromItem(stack, true);
         return manamount > 0 || stack.is(HexItems.CREATIVE_UNLOCKER);
     }
@@ -557,7 +562,7 @@ public abstract class BlockEntityAbstractImpetus extends HexBlockEntity implemen
         } else {
             var manamount = extractManaFromItem(stack, false);
             if (manamount > 0) {
-                this.mana += manamount;
+                this.mana = Math.min(manamount + mana, MAX_CAPACITY);
                 this.sync();
             }
         }
@@ -571,6 +576,6 @@ public abstract class BlockEntityAbstractImpetus extends HexBlockEntity implemen
     public int remainingManaCapacity() {
         if (this.mana < 0)
             return 0;
-        return MAX_CAPACITY - this.mana;
+        return Math.max(0, MAX_CAPACITY - this.mana);
     }
 }
