@@ -3,6 +3,7 @@ package at.petrak.hexcasting.client;
 import at.petrak.hexcasting.api.block.circle.BlockAbstractImpetus;
 import at.petrak.hexcasting.api.block.circle.BlockEntityAbstractImpetus;
 import at.petrak.hexcasting.api.client.ScryingLensOverlayRegistry;
+import at.petrak.hexcasting.api.item.ColorizedItem;
 import at.petrak.hexcasting.api.item.DataHolderItem;
 import at.petrak.hexcasting.api.item.ManaHolderItem;
 import at.petrak.hexcasting.api.misc.ManaConstants;
@@ -413,6 +414,9 @@ public class RegisterClientStuff {
             });
         IClientXplatAbstractions.INSTANCE.registerItemProperty((Item) item, ItemFocus.SEALED_PRED,
             (stack, level, holder, holderID) -> item.canWrite(stack, SpellDatum.make(Widget.NULL)) ? 0f : 1f);
+
+        IClientXplatAbstractions.INSTANCE.registerItemProperty((Item) item, ItemFocus.COLOR_PRED,
+          (stack, level, holder, holderID) -> ((ColorizedItem) item).readColorFloat(stack));
     }
 
     private static void registerPackagedSpellOverrides(ItemPackagedHex item) {
@@ -420,6 +424,8 @@ public class RegisterClientStuff {
             (stack, level, holder, holderID) ->
                 item.hasHex(stack) ? 1f : 0f
         );
+        IClientXplatAbstractions.INSTANCE.registerItemProperty(item, ItemFocus.COLOR_PRED,
+          (stack, level, holder, holderID) -> item.readColorFloat(stack));
     }
 
     private static void registerWandOverrides(ItemWand item) {

@@ -200,6 +200,8 @@ public class RegisterPatterns {
             PatternRegistry.mapPattern(HexPattern.fromAngles("awddwqawqwawq", HexDir.EAST),
                 modLoc("colorize"),
                 OpColorize.INSTANCE);
+            PatternRegistry.mapPattern(HexPattern.fromAngles("awqwawqqawddw", HexDir.SOUTH_EAST), modLoc("colorize_item"),
+                OpColorizeItem.INSTANCE);
             PatternRegistry.mapPattern(HexPattern.fromAngles("aqawqadaq", HexDir.SOUTH_EAST), modLoc("create_water"),
                 OpCreateWater.INSTANCE);
             PatternRegistry.mapPattern(HexPattern.fromAngles("dedwedade", HexDir.SOUTH_WEST),

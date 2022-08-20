@@ -1,5 +1,6 @@
 package at.petrak.hexcasting.common.items;
 
+import at.petrak.hexcasting.api.item.ColorizedItem;
 import at.petrak.hexcasting.api.item.DataHolderItem;
 import at.petrak.hexcasting.api.spell.SpellDatum;
 import at.petrak.hexcasting.api.spell.Widget;
@@ -17,7 +18,8 @@ import java.util.List;
 
 import static at.petrak.hexcasting.api.HexAPI.modLoc;
 
-public class ItemFocus extends Item implements DataHolderItem {
+public class ItemFocus extends Item implements DataHolderItem, ColorizedItem
+{
     public static final ResourceLocation DATATYPE_PRED = modLoc("datatype");
     public static final ResourceLocation SEALED_PRED = modLoc("sealed");
 

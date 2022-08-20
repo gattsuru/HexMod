@@ -1,5 +1,6 @@
 package at.petrak.hexcasting.common.items;
 
+import at.petrak.hexcasting.api.item.ColorizedItem;
 import at.petrak.hexcasting.api.item.DataHolderItem;
 import at.petrak.hexcasting.api.spell.SpellDatum;
 import at.petrak.hexcasting.api.spell.Widget;
@@ -21,7 +22,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.stream.Stream;
 
-public class ItemSpellbook extends Item implements DataHolderItem {
+public class ItemSpellbook extends Item implements DataHolderItem, ColorizedItem
+{
     public static String TAG_SELECTED_PAGE = "page_idx";
     // this is a CompoundTag of string numerical keys to SpellData
     // it is 1-indexed, so that 0/0 can be the special case of "it is empty"

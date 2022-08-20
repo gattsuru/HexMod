@@ -1,5 +1,6 @@
 package at.petrak.hexcasting.common.items.magic;
 
+import at.petrak.hexcasting.api.item.ColorizedItem;
 import at.petrak.hexcasting.api.item.HexHolderItem;
 import at.petrak.hexcasting.api.spell.SpellDatum;
 import at.petrak.hexcasting.api.spell.casting.CastingContext;
@@ -32,7 +33,8 @@ import static at.petrak.hexcasting.api.HexAPI.modLoc;
 /**
  * Item that holds a list of patterns in it ready to be cast
  */
-public abstract class ItemPackagedHex extends ItemManaHolder implements HexHolderItem {
+public abstract class ItemPackagedHex extends ItemManaHolder implements HexHolderItem, ColorizedItem
+{
     public static final String TAG_PATTERNS = "patterns";
     public static final ResourceLocation HAS_PATTERNS_PRED = modLoc("has_patterns");
 

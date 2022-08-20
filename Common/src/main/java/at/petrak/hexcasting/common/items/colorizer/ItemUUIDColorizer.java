@@ -48,4 +48,9 @@ public class ItemUUIDColorizer extends Item implements ColorizerItem {
 
         return Color.HSBtoRGB(hue, saturation, brightness);
     }
+
+    @Override
+    public String colorName() {
+        return "uuid";
+    }
 }
