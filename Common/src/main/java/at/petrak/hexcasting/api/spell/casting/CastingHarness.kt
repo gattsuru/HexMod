@@ -395,9 +395,9 @@ class CastingHarness private constructor(
             val casterHexHolder = IXplatAbstractions.INSTANCE.findHexHolder(casterStack)
             val hexHolderDrawsFromInventory = if (casterHexHolder != null) {
                 if (casterManaHolder != null) {
-                    val manaAvailable = casterManaHolder.mana
+                    val manaAvailable = casterManaHolder.withdrawMana(-1, true)
                     val manaToTake = min(costLeft, manaAvailable)
-                    if (!fake) casterManaHolder.mana = manaAvailable - manaToTake
+                    if (!fake) casterManaHolder.withdrawMana(manaToTake, false)
                     costLeft -= manaToTake
                 }
                 casterHexHolder.canDrawManaFromInventory()
@@ -488,12 +488,12 @@ class CastingHarness private constructor(
                     .mapNotNull(IXplatAbstractions.INSTANCE::findManaHolder)
             }
             DiscoveryHandlers.addManaHolderDiscoverer {
-                it.ctx.caster.armorSlots
+                it.ctx.caster.inventory.armor
                     .filter(::isManaItem)
                     .mapNotNull(IXplatAbstractions.INSTANCE::findManaHolder)
             }
             DiscoveryHandlers.addManaHolderDiscoverer {
-                listOf(it.ctx.caster.offhandItem)
+                it.ctx.caster.inventory.offhand
                     .filter(::isManaItem)
                     .mapNotNull(IXplatAbstractions.INSTANCE::findManaHolder)
             }
