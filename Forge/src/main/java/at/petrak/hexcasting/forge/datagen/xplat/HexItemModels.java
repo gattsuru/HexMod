@@ -1,11 +1,14 @@
 package at.petrak.hexcasting.forge.datagen.xplat;
 
 import at.petrak.hexcasting.api.HexAPI;
+import at.petrak.hexcasting.api.item.ColorizedItem;
 import at.petrak.hexcasting.common.items.ItemFocus;
 import at.petrak.hexcasting.common.items.ItemScroll;
 import at.petrak.hexcasting.common.items.ItemSlate;
 import at.petrak.hexcasting.common.items.ItemWand;
+import at.petrak.hexcasting.common.items.colorizer.ItemDyeColorizer;
 import at.petrak.hexcasting.common.items.colorizer.ItemPrideColorizer;
+import at.petrak.hexcasting.common.items.colorizer.ItemUUIDColorizer;
 import at.petrak.hexcasting.common.items.magic.ItemManaBattery;
 import at.petrak.hexcasting.common.items.magic.ItemPackagedHex;
 import at.petrak.hexcasting.common.lib.HexBlocks;
@@ -18,6 +21,10 @@ import net.minecraft.world.item.Item;
 import net.minecraftforge.client.model.generators.ModelBuilder;
 import net.minecraftforge.client.model.generators.ModelFile;
 import net.minecraftforge.common.data.ExistingFileHelper;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.stream.Stream;
 
 public class HexItemModels extends PaucalItemModelProvider {
     public HexItemModels(DataGenerator generator, ExistingFileHelper existingFileHelper) {
@@ -77,41 +84,69 @@ public class HexItemModels extends PaucalItemModelProvider {
 
         simpleItem(modLoc("patchouli_book"));
 
+        var colorVariants = ColorizedItem.getColorList();
+
         // For stupid bad reasons we need to do this in ascending order.
-        for (int sealedIdx = 0; sealedIdx <= 1; sealedIdx++) {
-            var sealed = sealedIdx == 1;
-            for (int i = 0, stringsLength = DATUM_TYPES.length; i < stringsLength; i++) {
-                var type = DATUM_TYPES[i];
+        for (int colorIdx = 0; colorIdx < colorVariants.size(); colorIdx++)
+        {
+            var focusBase = "focus_" + colorVariants.get(colorIdx);
+            var spellbookBase = "spellbook_" + colorVariants.get(colorIdx);
+            for (int sealedIdx = 0; sealedIdx <= 1; sealedIdx++)
+            {
+                var sealed = sealedIdx == 1;
+                for (int i = 0, stringsLength = DATUM_TYPES.length; i < stringsLength; i++)
+                {
+                    var type = DATUM_TYPES[i];
 
-                var suffix = type + (sealed ? "_sealed" : "");
+                    var overlay = type + (sealed ? "_sealed" : "");
 
-                var focusName = "focus_" + suffix;
-                singleTexture(focusName, new ResourceLocation("item/generated"),
-                    "layer0", modLoc("item/focus/" + suffix));
-                getBuilder(HexItems.FOCUS.getRegistryName().getPath())
-                    .override()
-                    .predicate(ItemFocus.DATATYPE_PRED, i)
-                    .predicate(ItemFocus.SEALED_PRED, sealed ? 1f : 0f)
-                    .model(new ModelFile.UncheckedModelFile(modLoc("item/" + focusName)))
-                    .end();
+                    var focusName = focusBase + "_" + overlay;
 
-                var spellbookName = "spellbook_" + type + (sealed ? "_sealed" : "");
-                singleTexture(spellbookName, new ResourceLocation("item/generated"),
-                    "layer0", modLoc("item/spellbook/" + suffix));
-                getBuilder(HexItems.SPELLBOOK.getRegistryName().getPath())
-                    .override()
-                    .predicate(ItemFocus.DATATYPE_PRED, i)
-                    .predicate(ItemFocus.SEALED_PRED, sealed ? 1f : 0f)
-                    .model(new ModelFile.UncheckedModelFile(modLoc("item/" + spellbookName)))
-                    .end();
+                    // Adds the actual texture items for the versions we'll present to the user.
+                    singleTexture(focusName, new ResourceLocation("item/generated"),
+                      "layer0", modLoc("item/focus/layer0/" + focusBase));
+                    if(!type.equals("empty") || sealed)
+                    {
+                        singleTexture(focusName, new ResourceLocation("item/generated"),
+                          "layer1", modLoc("item/focus/layer1/" + overlay));
+                    }
+
+                    // Add the overrides pointing to those singleTextures into the (giant) json for the base item.
+                    getBuilder(HexItems.FOCUS.getRegistryName().getPath())
+                      .override()
+                      .predicate(ItemFocus.DATATYPE_PRED, i)
+                      .predicate(ItemFocus.SEALED_PRED, sealed ? 1f : 0f)
+                      .predicate(ItemFocus.COLOR_PRED, colorIdx)
+                      .model(new ModelFile.UncheckedModelFile(modLoc("item/" + focusName)))
+                      .end();
+
+                    var spellbookName = spellbookBase + "_" + overlay;
+
+                    // Adds the actual texture items for the versions we'll present to the user.
+                    singleTexture(spellbookName, new ResourceLocation("item/generated"),
+                      "layer0", modLoc("item/spellbook/layer0/" + spellbookBase));
+                    if(!type.equals("empty") || sealed)
+                    {
+                        singleTexture(spellbookName, new ResourceLocation("item/generated"),
+                          "layer1", modLoc("item/spellbook/layer1/" + overlay));
+                    }
+
+                    // Add the overrides pointing to those singleTextures into the (giant) json for the base item.
+                    getBuilder(HexItems.SPELLBOOK.getRegistryName().getPath())
+                      .override()
+                      .predicate(ItemFocus.DATATYPE_PRED, i)
+                      .predicate(ItemFocus.SEALED_PRED, sealed ? 1f : 0f)
+                      .predicate(ItemFocus.COLOR_PRED, colorIdx)
+                      .model(new ModelFile.UncheckedModelFile(modLoc("item/" + spellbookName)))
+                      .end();
+                }
             }
+            buildPackagedSpell(HexItems.CYPHER, "cypher", colorVariants.get(colorIdx), colorIdx);
+            buildPackagedSpell(HexItems.TRINKET, "trinket", colorVariants.get(colorIdx), colorIdx);
+            buildPackagedSpell(HexItems.ARTIFACT, "artifact", colorVariants.get(colorIdx), colorIdx);
         }
 
-        buildPackagedSpell(HexItems.CYPHER, "cypher");
-        buildPackagedSpell(HexItems.TRINKET, "trinket");
-        buildPackagedSpell(HexItems.ARTIFACT, "artifact");
-
-        int maxFill = 4;
+        int maxFill = 5;
         for (int size = 0; size < PHIAL_SIZES.length; size++) {
             for (int fill = 0; fill <= maxFill; fill++) {
                 String name = "phial_" + PHIAL_SIZES[size] + "_" + fill;
@@ -121,6 +156,10 @@ public class HexItemModels extends PaucalItemModelProvider {
                     "layer0", modLoc("item/phial/" + name));
 
                 float fillProp = (float) fill / maxFill;
+                if(size == 1)
+                {
+                    fillProp = 0.0001f;
+                }
                 getBuilder(HexItems.BATTERY.getRegistryName().getPath()).override()
                     .predicate(ItemManaBattery.MANA_PREDICATE, fillProp)
                     .predicate(ItemManaBattery.MAX_MANA_PREDICATE, size)
@@ -203,17 +242,25 @@ public class HexItemModels extends PaucalItemModelProvider {
             .end();
     }
 
-    private void buildPackagedSpell(Item item, String name) {
-        simpleItem(modLoc(name));
-        simpleItem(modLoc(name + "_filled"));
+    private void buildPackagedSpell(Item item, String name, String colorVariant, int colorIdx) {
+        var colorizedName = name + "_" + colorVariant;
+        singleTexture(colorizedName, new ResourceLocation("item/generated"),
+          "layer0", modLoc("item/packagedhex/layer0/" + colorizedName));
+        singleTexture(colorizedName + "_filled", new ResourceLocation("item/generated"),
+          "layer0", modLoc("item/packagedhex/layer0/" + colorizedName));
+        singleTexture(colorizedName + "_filled", new ResourceLocation("item/generated"),
+          "layer1", modLoc("item/packagedhex/layer1/" + name + "_filled"));
+
         getBuilder(item.getRegistryName().getPath())
             .override()
             .predicate(ItemPackagedHex.HAS_PATTERNS_PRED, -0.01f)
-            .model(new ModelFile.UncheckedModelFile(modLoc("item/" + name)))
+            .predicate(ItemPackagedHex.COLOR_PRED, colorIdx)
+            .model(new ModelFile.UncheckedModelFile(modLoc("item/" + colorizedName)))
             .end()
             .override()
             .predicate(ItemPackagedHex.HAS_PATTERNS_PRED, 1f - 0.01f)
-            .model(new ModelFile.UncheckedModelFile(modLoc("item/" + name + "_filled")))
+            .predicate(ItemPackagedHex.COLOR_PRED, colorIdx)
+            .model(new ModelFile.UncheckedModelFile(modLoc("item/" + colorizedName + "_filled")))
             .end();
     }
 }
