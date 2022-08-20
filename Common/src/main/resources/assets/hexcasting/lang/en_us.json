@@ -422,6 +422,7 @@
   "hexcasting.mishap.bad_item.bottle": "a glass bottle",
   "hexcasting.mishap.bad_item.rechargable": "a rechargable item",
   "hexcasting.mishap.bad_item.colorizer": "a pigment",
+  "hexcasting.mishap.bad_item.colorizer.soul": "a pigment which doesn't require a soul",
   "hexcasting.mishap.bad_block": "Expected %s at %s, but got %s",
   "hexcasting.mishap.bad_block.sapling": "a sapling",
   "hexcasting.mishap.bad_block.replaceable": "somewhere to place a block",
@@ -957,7 +958,7 @@
   "hexcasting.page.sentinels.sentinel/wayfind": "Transform the position vector on the top of the stack into a unit vector pointing from that position to my $(l:patterns/spells/sentinels)$(thing)sentinel/$, or $(l:casting/influences)$(thing)Null/$ if it isn't summoned. Costs a negligible amount of _media.",
 
   "hexcasting.page.colorize": "I must be holding a $(l:items/pigments)$(item)Pigment/$ in my other hand to cast this spell. When I do, it will consume the dye and permanently change my mind's coloration (at least, until I cast the spell again). Costs about one $(l:items/amethyst)$(item)Amethyst Dust/$.",
-  "hexcasting.page.colorize_item": "This spell applies a $(l:items/pigments)$(item)Pigment/$ held in my other hand to the exterior of a $(l:items/hexcasting)$(thing)cypher/$, $(l:items/hexcasting)$(thing)trinket/$, $(l:items/hexcasting)$(thing)artifact/$, $(l:items/focus)$(thing)focus/$, or $(l:items/spellbook)$(thing)spellbook/$. Costs about one $(l:items/amethyst)$(item)Amethyst Dust/$.",
+  "hexcasting.page.colorize_item": "This spell applies a $(l:items/pigments)$(item)Pigment/$ held in my other hand to the exterior of a $(l:items/hexcasting)$(thing)cypher/$, $(l:items/hexcasting)$(thing)trinket/$, $(l:items/hexcasting)$(thing)artifact/$, $(l:items/focus)$(thing)focus/$, or $(l:items/spellbook)$(thing)spellbook/$. Costs about one $(l:items/amethyst)$(item)Amethyst Dust/$.  Incompatible with Soul Glimmer.",
 
   "hexcasting.page.create_lava.1": "Summon a block of lava or insert a bucket's worth into a block at the given position. Costs about one $(l:items/amethyst)$(item)Charged Amethyst/$.",
   "hexcasting.page.create_lava.2": "It may be advisable to keep my knowledge of this spell secret. A certain faction of botanists get... touchy about it, or so I've heard.$(br2)Well, no one said tracing the deep secrets of the universe was going to be an easy time.",

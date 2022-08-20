@@ -48,7 +48,7 @@ object OpColorizeItem : SpellOperator {
         return Triple(
             Spell(entity),
             ManaConstants.DUST_UNIT,
-            listOf()
+            listOf(ParticleSpray.burst(entity.position(), 0.5))
         )
     }
 
@@ -57,22 +57,11 @@ object OpColorizeItem : SpellOperator {
             val handStack = ctx.getHeldItemToOperateOn(IXplatAbstractions.INSTANCE::isColorizer).first.copy()
             if (IXplatAbstractions.INSTANCE.isColorizer(handStack)) {
                 if (ctx.withdrawItem(handStack.item, 1, true)) {
-                    if(input.item.item is ColorizedItem) {
-                        (input.item.item as ColorizedItem).writeColor(input.item, (handStack.item as ColorizerItem))
-
-                        //  Have to make a fresh ItemEntity to update the model.
-                        //  Give it a little 'oomph' so it feels reactive.
-                        val lookAngle = ctx.caster.lookAngle.scale(0.5)
-                        ctx.world.addWithUUID(ItemEntity(ctx.world,
-                            input.x,
-                            input.y,
-                            input.z,
-                            input.item,
-                            lookAngle.x + (Math.random() - 0.5) * 0.04,
-                            abs(lookAngle.y + (Math.random() - 0.5) * 0.04), // always want to shove it upwards.
-                            lookAngle.x + (Math.random() - 0.5) * 0.04))
-
-                        input.kill()
+                    // Have to make a fresh ItemStack to update the ItemEntity's model.
+                    val targetItemStack = input.item.copy()
+                    if(targetItemStack.item is ColorizedItem) {
+                        ((targetItemStack.item)as ColorizedItem).writeColor(targetItemStack, (handStack.item as ColorizerItem))
+                        input.item = targetItemStack;
                     }
                 }
             }
