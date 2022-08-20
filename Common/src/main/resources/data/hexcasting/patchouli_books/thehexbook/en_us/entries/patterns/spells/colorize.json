@@ -13,6 +13,14 @@
       "input": "",
       "output": "",
       "text": "hexcasting.page.colorize"
+    },
+    {
+      "type": "hexcasting:pattern",
+      "op_id": "hexcasting:colorize_item",
+      "anchor": "hexcasting:colorize_item",
+      "input": "entity",
+      "output": "",
+      "text": "hexcasting.page.colorize_item"
     }
   ]
 }

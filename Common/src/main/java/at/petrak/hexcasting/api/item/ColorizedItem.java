@@ -25,9 +25,9 @@ public interface ColorizedItem
         return NBTHelper.getFloat(stack, TAG_COLOR_FLOAT);
     }
 
-    default void writeColor(ItemStack stack, float value)
+    default void writeColor(ItemStack stack, ColorizerItem input)
     {
-        NBTHelper.putFloat(stack, TAG_COLOR_FLOAT, value);
+        NBTHelper.putFloat(stack, TAG_COLOR_FLOAT, getColorList().indexOf(input.colorName()));
     }
 
     // Returns an ArrayList containing the supported colorizer variants, in the specific order used for the Item predicates.

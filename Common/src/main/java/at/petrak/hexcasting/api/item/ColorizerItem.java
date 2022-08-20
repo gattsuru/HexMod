@@ -9,4 +9,5 @@ import java.util.UUID;
 @ApiStatus.OverrideOnly
 public interface ColorizerItem {
 	int color(ItemStack stack, UUID owner, float time, Vec3 position);
+	String colorName();
 }

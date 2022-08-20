@@ -24,4 +24,9 @@ public class ItemDyeColorizer extends Item implements ColorizerItem {
     public int color(ItemStack stack, UUID owner, float time, Vec3 position) {
         return dyeColor.getTextColor();
     }
+
+    @Override
+    public String colorName(){
+        return dyeColor.getName();
+    }
 }

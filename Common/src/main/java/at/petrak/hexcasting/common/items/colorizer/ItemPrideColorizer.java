@@ -47,6 +47,11 @@ public class ItemPrideColorizer extends Item implements ColorizerItem {
         return Colorizer.morphBetweenColors(getColors(), new Vec3(0.1, 0.1, 0.1), time / 20 / 20, position);
     }
 
+    @Override
+    public String colorName() {
+        return type.getName();
+    }
+
     public int[] getColors() {
         return COLORS.get(this.type);
     }
